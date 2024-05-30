@@ -3,15 +3,20 @@ import fs from "fs";
 import path from "path";
 import mime from "mime";
 import chardet from "chardet";
+import { PIN } from '../../../constants/app';
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const filesDirPath = path.join(__dirname, "./files");
 
-function makeDir() {
+export function makeDir() {
   try {
-    fs.mkdirSync(filesDirPath, { recursive: true });
+    PIN.forEach(item => {
+      if (!fs.existsSync(path.join(filesDirPath,'/',item))) {
+        fs.mkdirSync(path.join(filesDirPath,'/',item), { recursive: true });
+      }
+  });
   } catch {}
 }
 
@@ -37,9 +42,9 @@ export default {
     return { exists, content, mimetype, encoding };
   },
 
-  async writeFile(fp: string, content: Buffer) {
+  async writeFile(fp: string, content: Buffer,password: string) {
     eventTarget.dispatchEvent(new Event("change"));
-    fp = path.join(filesDirPath, `./${fp}`);
+    fp = path.join(filesDirPath,`./${password}`, `./${fp}`);
     return new Promise((resolve, reject) =>
       fs.writeFile(fp, content, {}, (err) => {
         if (err) return reject(err);
